@@ -1,57 +1,37 @@
-// src/utils/openAI.js
-import axios from 'axios';
+import OpenAI from 'openai/index.mjs';
 
-const API_KEY = 'API_KEY'; // Replace with your actual OpenAI API key
+const openai = new OpenAI({
+  apiKey: process.env.REACT_APP_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true // Only for development
+});
 
-// Function to fetch recipes
-export const getRecipes = async () => {
-  try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/completions',
-      {
-        model: 'text-davinci-003',
-        prompt: 'Generate a list of recipes',
-        max_tokens: 2048,
-        temperature: 0.7,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    return response.data.choices[0].text;
-  } catch (error) {
-    console.error('Error fetching recipes:', error);
-    throw error;
-  }
-};
+console.log("API Key (first 5 chars):", process.env.REACT_APP_OPENAI_API_KEY?.substring(0, 5) + "...");
 
-// Function to fetch ingredient-based suggestions
 export const getSuggestions = async (ingredients) => {
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/completions',
-      {
-        model: 'text-davinci-003',
-        prompt: `Suggest recipes based on these ingredients: ${ingredients}`,
-        max_tokens: 2048,
-        temperature: 0.7,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    return response.data.choices[0].text;
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{
+        role: "system",
+        content: `You're a professional chef. Create detailed recipes using ONLY these ingredients: ${ingredients}. 
+        Include cooking instructions, preparation time, and serving suggestions. Format your response using Markdown.`
+      }],
+      temperature: 0.7,
+      max_tokens: 1000
+    });
+    return completion.choices[0].message.content;
   } catch (error) {
-    console.error('Error fetching suggestions:', error);
-    throw error;
+    console.error("Full OpenAI Error:", error);
+    if (error.response) {
+      console.error("Error status:", error.response.status);
+      console.error("Error data:", error.response.data);
+    }
+    if (error.message.includes("API key")) {
+      return "⚠️ API key error. Please check your OpenAI API key.";
+    }
+    if (error.message.includes("rate limit")) {
+      return "⚠️ Rate limit exceeded. Please try again later.";
+    }
+    return `⚠️ Error generating recipes: ${error.message}`;
   }
 };
-
-// Default export (optional, if needed elsewhere)
-export default { getRecipes, getSuggestions };
