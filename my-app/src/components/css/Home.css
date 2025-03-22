@@ -1,0 +1,14 @@
+/* src/components/css/Home.css */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  button {
+    font-weight: bold;
+  }
+  
+  .flex-container {
+    display: flex;
+  }
+  
