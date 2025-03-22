@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowBackIcon, StarIcon } from '@chakra-ui/icons';
-import { Box, IconButton, Spinner, Center, Tooltip, useToast, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, SimpleGrid } from '@chakra-ui/react';
+import { ArrowBackIcon } from '@chakra-ui/icons';
+import { Box, IconButton, Spinner, Center, Tooltip, useToast, Text } from '@chakra-ui/react';
 import { FaBookmark } from 'react-icons/fa';
 import SearchBar from './SearchBar';
 import RecipeList from './RecipeList';
@@ -12,6 +12,7 @@ import '../css/RecipeView.css';
 function RecipeView() {
   const navigate = useNavigate();
   const toast = useToast();
+  const audioRef = useRef(null);
   const [recipes, setRecipes] = useState([]);
   const [categories, setCategories] = useState([]);
   const [areas, setAreas] = useState([]);
@@ -19,9 +20,8 @@ function RecipeView() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [savedMeals, setSavedMeals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showSaved, setShowSaved] = useState(false);
+  const [noResults, setNoResults] = useState(false);
 
-  // Load saved meals from localStorage on mount
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('savedMeals') || '[]');
     setSavedMeals(saved);
@@ -83,10 +83,17 @@ function RecipeView() {
 
   const searchRecipes = useCallback(async (query) => {
     setIsLoading(true);
+    setNoResults(false);
     try {
       const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${query}`);
       const data = await response.json();
-      setRecipes(data.meals || []);
+      if (data.meals) {
+        setRecipes(data.meals);
+      } else {
+        setRecipes([]);
+        setNoResults(true);
+        playAudio();
+      }
     } catch (error) {
       console.error('Error searching recipes:', error);
     } finally {
@@ -96,6 +103,7 @@ function RecipeView() {
 
   const searchByCategory = useCallback(async (category) => {
     setIsLoading(true);
+    setNoResults(false);
     try {
       const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`);
       const data = await response.json();
@@ -109,6 +117,7 @@ function RecipeView() {
 
   const searchByArea = useCallback(async (area) => {
     setIsLoading(true);
+    setNoResults(false);
     try {
       const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?a=${area}`);
       const data = await response.json();
@@ -120,6 +129,12 @@ function RecipeView() {
     }
   }, []);
 
+  const playAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.play();
+    }
+  };
+
   if (isLoading) {
     return (
       <Center height="100vh">
@@ -130,7 +145,6 @@ function RecipeView() {
 
   return (
     <div className="RecipeView">
-      {/* Back Button */}
       <Box position="fixed" top={4} left={4} zIndex={1000}>
         <IconButton
           icon={<ArrowBackIcon />}
@@ -143,12 +157,11 @@ function RecipeView() {
         />
       </Box>
 
-      {/* Saved Meals Button */}
       <Box position="fixed" top={4} right={4} zIndex={1000}>
         <Tooltip label="Saved Meals">
           <IconButton
             icon={<FaBookmark />}
-            onClick={() => navigate('/saved-meals')}  // Changed to navigate to dedicated page
+            onClick={() => navigate('/saved-meals')}
             aria-label="View saved meals"
             size="lg"
             colorScheme="yellow"
@@ -163,7 +176,15 @@ function RecipeView() {
 
       {!selectedRecipe && (
         <>
-          {recipes.length === 0 && (
+          {noResults && (
+            <Text fontSize="xl" textAlign="center" mt={4} color="gray.600">
+              No results found. This recipe doesn't exist. Feature coming soon! 😢
+            </Text>
+          )}
+
+          <audio ref={audioRef} src="/wah-wah-sad-trombone-6347.mp3" />
+
+          {recipes.length === 0 && !noResults && (
             <div className="home-sections">
               <section className="hero">
                 <h2 className="section-title">Featured Recipes</h2>

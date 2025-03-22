@@ -74,9 +74,9 @@ const Login = ({ onLogin }) => {
                 {/* Logo Section */}
                 <Flex justify="center" mb={6}>
                     <img
-                        src="/img/a.png" // Replace with your logo path
+                        src="/img/a.png"
                         alt="Logo"
-                        style={{ width: '150px', height: 'auto' }} // Adjust size as needed
+                        style={{ width: '150px', height: 'auto' }}
                     />
                 </Flex>
 

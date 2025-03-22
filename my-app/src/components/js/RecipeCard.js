@@ -15,7 +15,7 @@ const RecipeCard = ({ recipe, onClick, isSaved }) => {
     } else {
       localStorage.setItem('savedMeals', JSON.stringify([...saved, recipe]));
     }
-    navigate(0); // Refresh the page to update state
+    navigate(0);
   };
 
   return (
