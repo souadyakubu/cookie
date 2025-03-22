@@ -1,0 +1,25 @@
+.cooking-game-mode {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.recipe-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.ingredients,
+.utensils {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.ingredients div,
+.utensils div {
+    margin: 10px;
+}
+
+img {
+    border-radius: 5px;
+}
