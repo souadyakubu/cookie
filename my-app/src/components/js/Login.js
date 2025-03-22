@@ -1,54 +1,34 @@
-// components/Signup.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { registerWithEmailAndPassword } from '../services/firebase';
-import { updateProfile } from 'firebase/auth';
-import { auth } from '../services/firebase';
+import { loginWithEmailAndPassword } from '../../services/firebase';
 
-const Signup = () => {
+const Login = ({ onLogin }) => {
     const navigate = useNavigate();
-    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSignUp = async () => {
-        setError('');
-
-        // Validate inputs
-        if (!username || !email || !password || !confirmPassword) {
+    const handleLogin = async () => {
+        if (!email || !password) {
             setError('Please fill in all fields.');
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            setError('Passwords do not match.');
-            return;
-        }
-
-        if (password.length < 6) {
-            setError('Password should be at least 6 characters long.');
             return;
         }
 
         try {
             setIsLoading(true);
+            setError('');
 
-            const { user, error: registerError } = await registerWithEmailAndPassword(email, password);
+            const { user, error: loginError } = await loginWithEmailAndPassword(email, password);
 
-            if (registerError) {
-                setError(registerError);
+            if (loginError) {
+                setError(loginError);
                 return;
             }
 
             if (user) {
-                await updateProfile(auth.currentUser, {
-                    displayName: username,
-                });
-
-                navigate('/');
+                onLogin?.();
+                navigate('/home'); // ✅ Redirect to Home
             }
         } catch (err) {
             setError(err.message);
@@ -60,16 +40,8 @@ const Signup = () => {
     return (
         <div style={styles.wrapper}>
             <div style={styles.container}>
-                <h2 style={styles.title}>Sign Up</h2>
+                <h2 style={styles.title}>Login</h2>
                 {error && <div style={styles.error}>{error}</div>}
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    style={styles.input}
-                    disabled={isLoading}
-                />
                 <input
                     type="email"
                     placeholder="Email"
@@ -86,16 +58,8 @@ const Signup = () => {
                     style={styles.input}
                     disabled={isLoading}
                 />
-                <input
-                    type="password"
-                    placeholder="Confirm Password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    style={styles.input}
-                    disabled={isLoading}
-                />
                 <button
-                    onClick={handleSignUp}
+                    onClick={handleLogin}
                     style={{
                         ...styles.button,
                         opacity: isLoading ? 0.7 : 1,
@@ -103,12 +67,12 @@ const Signup = () => {
                     }}
                     disabled={isLoading}
                 >
-                    {isLoading ? 'Signing up...' : 'Sign Up'}
+                    {isLoading ? 'Logging in...' : 'Login'}
                 </button>
                 <p style={styles.text}>
-                    Already have an account?{' '}
-                    <Link to="/" style={styles.link}>
-                        Log in
+                    Don't have an account?{' '}
+                    <Link to="/signup" style={styles.link}>
+                        Sign up
                     </Link>
                 </p>
             </div>
@@ -179,7 +143,7 @@ const styles = {
         marginBottom: '15px',
         width: '100%',
         textAlign: 'center',
-    },
+    }
 };
 
-export default Signup;
+export default Login;
