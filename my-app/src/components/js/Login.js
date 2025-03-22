@@ -1,149 +1,126 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginWithEmailAndPassword } from '../../services/firebase';
+import { Box, Flex, Heading, Input, Button, Text, useToast } from '@chakra-ui/react';
+import { motion } from 'framer-motion';
+
+const MotionBox = motion(Box);
 
 const Login = ({ onLogin }) => {
     const navigate = useNavigate();
+    const toast = useToast();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const handleLogin = async () => {
         if (!email || !password) {
-            setError('Please fill in all fields.');
+            toast({
+                title: "Error",
+                description: "Please fill in all fields.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
             return;
         }
 
         try {
             setIsLoading(true);
-            setError('');
 
             const { user, error: loginError } = await loginWithEmailAndPassword(email, password);
 
             if (loginError) {
-                setError(loginError);
-                return;
+                throw new Error(loginError);
             }
 
             if (user) {
                 onLogin?.();
-                navigate('/home'); // ✅ Redirect to Home
+                navigate('/home');
             }
         } catch (err) {
-            setError(err.message);
+            toast({
+                title: "Error",
+                description: err.message,
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div style={styles.wrapper}>
-            <div style={styles.container}>
-                <h2 style={styles.title}>Login</h2>
-                {error && <div style={styles.error}>{error}</div>}
-                <input
+        <Flex
+            direction="column"
+            align="center"
+            justify="center"
+            height="100vh"
+            bg="#f5f5dc"
+            p={4}
+        >
+            <MotionBox
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                bg="white"
+                p={8}
+                borderRadius="lg"
+                boxShadow="2xl"
+                width="100%"
+                maxWidth="400px"
+            >
+                {/* Logo Section */}
+                <Flex justify="center" mb={6}>
+                    <img
+                        src="/img/a.png" // Replace with your logo path
+                        alt="Logo"
+                        style={{ width: '150px', height: 'auto' }} // Adjust size as needed
+                    />
+                </Flex>
+
+                <Heading as="h2" size="xl" color="#333" mb={6} textAlign="center">
+                    Login
+                </Heading>
+
+                <Input
                     type="email"
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    style={styles.input}
+                    mb={4}
                     disabled={isLoading}
                 />
-                <input
+
+                <Input
                     type="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    style={styles.input}
+                    mb={6}
                     disabled={isLoading}
                 />
-                <button
+
+                <Button
                     onClick={handleLogin}
-                    style={{
-                        ...styles.button,
-                        opacity: isLoading ? 0.7 : 1,
-                        cursor: isLoading ? 'not-allowed' : 'pointer'
-                    }}
-                    disabled={isLoading}
+                    isLoading={isLoading}
+                    loadingText="Logging in..."
+                    colorScheme="blue"
+                    width="100%"
                 >
-                    {isLoading ? 'Logging in...' : 'Login'}
-                </button>
-                <p style={styles.text}>
+                    Login
+                </Button>
+
+                <Text mt={4} color="#666" textAlign="center">
                     Don't have an account?{' '}
-                    <Link to="/signup" style={styles.link}>
+                    <Link to="/signup" style={{ color: '#007bff', textDecoration: 'underline' }}>
                         Sign up
                     </Link>
-                </p>
-            </div>
-        </div>
+                </Text>
+            </MotionBox>
+        </Flex>
     );
-};
-
-const styles = {
-    wrapper: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        backgroundColor: '#121212',
-        width: '100vw',
-    },
-    container: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-        maxWidth: '400px',
-        padding: '40px',
-        backgroundColor: '#1e1e1e',
-        borderRadius: '10px',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.4)',
-    },
-    title: {
-        fontSize: '28px',
-        marginBottom: '20px',
-        color: '#fff',
-    },
-    input: {
-        width: '100%',
-        padding: '15px',
-        margin: '10px 0',
-        borderRadius: '5px',
-        border: '1px solid #444',
-        backgroundColor: '#333',
-        color: '#fff',
-        fontSize: '16px',
-    },
-    button: {
-        padding: '15px 30px',
-        backgroundColor: '#007bff',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '5px',
-        cursor: 'pointer',
-        fontSize: '16px',
-        marginTop: '20px',
-    },
-    text: {
-        marginTop: '20px',
-        color: '#bbb',
-    },
-    link: {
-        color: '#007bff',
-        cursor: 'pointer',
-        textDecoration: 'underline',
-    },
-    error: {
-        color: '#ff4444',
-        backgroundColor: 'rgba(255, 68, 68, 0.1)',
-        padding: '10px',
-        borderRadius: '5px',
-        marginBottom: '15px',
-        width: '100%',
-        textAlign: 'center',
-    }
 };
 
 export default Login;

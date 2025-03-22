@@ -1,35 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useNavigate } from 'react-router-dom';
 import { getSuggestions } from '../../utils/openAI';
+import { Box, Flex, Heading, Input, Button, VStack, Tag, TagLabel, TagCloseButton, IconButton, Text, Grid, Container, Divider } from '@chakra-ui/react';
+import { ArrowBackIcon } from '@chakra-ui/icons';
+import { motion } from 'framer-motion';
+
+const MotionBox = motion(Box);
 
 const categories = {
   Vegetables: ['Tomato', 'Carrot', 'Broccoli', 'Spinach', 'Garlic', 'Onion'],
   Proteins: ['Chicken', 'Beef', 'Tofu', 'Eggs', 'Salmon', 'Shrimp'],
-  Grains: ['Rice', 'Pasta', 'Quinoa', 'Bread', 'Oats', 'Barley'],
-  Dairy: ['Milk', 'Cheese', 'Yogurt', 'Butter', 'Cream', 'Cottage Cheese']
+  Grains: ['Rice', 'Pasta', 'Wheet', 'Oats', 'Barley'],
+  Dairy: ['Milk', 'Cheese', 'Yogurt', 'Butter', 'Cream']
 };
 
 const IngredientSuggestions = () => {
+  const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [selected, setSelected] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
   const [results, setResults] = useState('');
   const [loading, setLoading] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-
-  useEffect(() => {
-    const allIngredients = Object.values(categories).flat();
-    const filtered = allIngredients.filter(ingredient =>
-      ingredient.toLowerCase().includes(input.toLowerCase()) &&
-      !selected.includes(ingredient)
-    );
-    setSuggestions(filtered.slice(0, 5));
-  }, [input, selected]);
 
   const handleSelect = (ingredient) => {
-    setSelected([...selected, ingredient]);
-    setInput('');
-    setSuggestions([]);
+    if (!selected.includes(ingredient)) {
+      setSelected([...selected, ingredient]);
+    }
+    if (input === ingredient) {
+      setInput('');
+    }
   };
 
   const handleRemove = (ingredient) => {
@@ -50,110 +49,196 @@ const IngredientSuggestions = () => {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && input) {
-      handleSelect(input);
-    }
-    if (e.key === 'ArrowDown') {
-      setActiveIndex(prev => Math.min(prev + 1, suggestions.length - 1));
-    }
-    if (e.key === 'ArrowUp') {
-      setActiveIndex(prev => Math.max(prev - 1, -1));
+    if (e.key === 'Enter' && input.trim()) {
+      handleSelect(input.trim());
     }
   };
 
+  const TitleBox = ({ children }) => (
+    <Box
+      position="relative"
+      mb={8}
+      _after={{
+        content: '""',
+        position: 'absolute',
+        bottom: '-4px',
+        left: '0',
+        width: '60px',
+        height: '4px',
+        backgroundColor: 'blue.500',
+        borderRadius: 'full'
+      }}
+    >
+      {children}
+    </Box>
+  );
+
   return (
-    <div className="container mx-auto p-4 max-w-2xl">
-      <h1 className="text-3xl font-bold mb-6">AI Recipe Generator 🍳</h1>
-
-      {/* Category Selection */}
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">Suggested Ingredients</h2>
-        {Object.entries(categories).map(([category, items]) => (
-          <div key={category} className="mb-4">
-            <h3 className="font-medium mb-2">{category}</h3>
-            <div className="flex flex-wrap gap-2">
-              {items.map(item => (
-                <button
-                  key={item}
-                  onClick={() => handleSelect(item)}
-                  className={`px-3 py-1 rounded-full ${selected.includes(item)
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-200 hover:bg-gray-300'
-                    }`}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Custom Input */}
-      <div className="relative mb-6">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type or select ingredients..."
-          className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+    <Box minHeight="100vh" bg="#f5f5dc" py={12}>
+      <Container maxWidth="1200px">
+        <IconButton
+          icon={<ArrowBackIcon />}
+          onClick={() => navigate('/home')}
+          aria-label="Go back to home"
+          size="lg"
+          colorScheme="black"
+          bg="black"
+          boxShadow="md"
+          position="absolute"
+          top={4}
+          left={4}
         />
 
-        {suggestions.length > 0 && (
-          <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 shadow-lg">
-            {suggestions.map((suggestion, index) => (
-              <li
-                key={suggestion}
-                onClick={() => handleSelect(suggestion)}
-                className={`p-2 hover:bg-gray-100 cursor-pointer ${index === activeIndex ? 'bg-blue-50' : ''
-                  }`}
-              >
-                {suggestion}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+        <MotionBox
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          textAlign="center"
+          mb={12}
+        >
+          <Heading as="h1" size="xl" color="#333" fontWeight="extrabold" letterSpacing="wide">
+            Recipe Generator 🍳
+          </Heading>
+          <Text mt={2} fontSize="xl" color="gray.600">Discover delicious recipes with your ingredients!</Text>
+        </MotionBox>
 
-      {/* Selected Ingredients */}
-      <div className="mb-6">
-        <div className="flex flex-wrap gap-2">
-          {selected.map(ingredient => (
-            <div
-              key={ingredient}
-              className="bg-blue-100 px-3 py-1 rounded-full flex items-center gap-2"
+        <Box bg="white" borderRadius="xl" boxShadow="2xl" p={8}>
+          <VStack spacing={12} align="stretch">
+            <Box>
+              <TitleBox>
+                <Heading as="h2" size="lg" mb={2}>
+                  Suggested Ingredients
+                </Heading>
+              </TitleBox>
+              <Grid templateColumns="repeat(2, 1fr)" gap={8}>
+                {Object.entries(categories).map(([category, items]) => (
+                  <Box key={category} bg="gray.50" p={6} borderRadius="lg" boxShadow="md">
+                    <Heading as="h3" size="md" mb={4} color="gray.600">
+                      {category}
+                    </Heading>
+                    <Divider mb={4} />
+                    <Flex flexWrap="wrap" gap={3}>
+                      {items.map(item => (
+                        <MotionBox
+                          key={item}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Button
+                            onClick={() => handleSelect(item)}
+                            colorScheme={selected.includes(item) ? "blue" : "gray"}
+                            variant={selected.includes(item) ? "solid" : "outline"}
+                            size="md"
+                          >
+                            {item}
+                          </Button>
+                        </MotionBox>
+                      ))}
+                    </Flex>
+                  </Box>
+                ))}
+              </Grid>
+            </Box>
+
+            <Box>
+              <TitleBox>
+                <Heading as="h2" size="lg" mb={2}>
+                  Add Custom Ingredient
+                </Heading>
+              </TitleBox>
+              <Flex>
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Type an ingredient and press Enter..."
+                  size="lg"
+                  mr={4}
+                />
+                <Button
+                  onClick={() => handleSelect(input.trim())}
+                  colorScheme="blue"
+                  isDisabled={!input.trim()}
+                  size="lg"
+                >
+                  Add
+                </Button>
+              </Flex>
+            </Box>
+
+            <Box>
+              <TitleBox>
+                <Heading as="h3" size="lg" mb={2}>
+                  Selected Ingredients
+                </Heading>
+              </TitleBox>
+              <Flex flexWrap="wrap" gap={3}>
+                {selected.map(ingredient => (
+                  <Tag key={ingredient} size="lg" borderRadius="full" variant="solid" colorScheme="blue">
+                    <TagLabel>{ingredient}</TagLabel>
+                    <TagCloseButton onClick={() => handleRemove(ingredient)} />
+                  </Tag>
+                ))}
+              </Flex>
+            </Box>
+
+            <MotionBox
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              textAlign="center"
             >
-              {ingredient}
-              <button
-                onClick={() => handleRemove(ingredient)}
-                className="text-gray-500 hover:text-gray-700"
+              <Button
+                onClick={handleSubmit}
+                isDisabled={selected.length === 0 || loading}
+                colorScheme="blue"
+                size="lg"
+                px={12}
+                py={6}
+                borderRadius="lg"
+                boxShadow="lg"
+                _hover={{
+                  boxShadow: 'xl',
+                  transform: 'translateY(-2px)'
+                }}
+                transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+                rightIcon={<span>✨</span>}
               >
-                ×
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
+                {loading ? 'Cooking Up Recipes...' : 'Generate Magic Recipes'}
+              </Button>
+            </MotionBox>
 
-      {/* Submit Button */}
-      <button
-        onClick={handleSubmit}
-        disabled={selected.length === 0 || loading}
-        className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
-      >
-        {loading ? 'Generating Recipes...' : 'Generate Recipes'}
-      </button>
-
-      {/* Results */}
-      {results && (
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <div className="prose">
-            <ReactMarkdown>{results}</ReactMarkdown>
-          </div>
-        </div>
-      )}
-    </div>
+            {results && (
+              <MotionBox
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                bg="gray.50"
+                p={6}
+                borderRadius="lg"
+                boxShadow="md"
+              >
+                <ReactMarkdown
+                  components={{
+                    h1: ({ node, ...props }) => (
+                      <Heading as="h1" size="2xl" fontWeight="bold" mb={6} borderBottom="2px" borderColor="blue.500" pb={2} {...props} />
+                    ),
+                    h2: ({ node, ...props }) => (
+                      <Heading as="h2" size="xl" fontWeight="bold" mb={4} color="blue.600" {...props} />
+                    ),
+                    h3: ({ node, ...props }) => (
+                      <Heading as="h3" size="lg" fontWeight="bold" mb={3} color="blue.500" {...props} />
+                    ),
+                    strong: ({ node, ...props }) => <Text as="strong" fontWeight="bold" color="blue.700" {...props} />
+                  }}
+                >
+                  {results}
+                </ReactMarkdown>
+              </MotionBox>
+            )}
+          </VStack>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

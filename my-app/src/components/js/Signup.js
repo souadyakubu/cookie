@@ -1,185 +1,155 @@
-// components/Signup.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { registerWithEmailAndPassword } from '../../services/firebase';
+import { registerWithEmailAndPassword, auth } from '../../services/firebase';
 import { updateProfile } from 'firebase/auth';
-import { auth } from '../../services/firebase';
+import { Box, Flex, Heading, Input, Button, Text, useToast } from '@chakra-ui/react';
+import { motion } from 'framer-motion';
+
+const MotionBox = motion(Box);
 
 const Signup = () => {
     const navigate = useNavigate();
+    const toast = useToast();
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSignUp = async () => {
-        setError('');
-
         // Validate inputs
         if (!username || !email || !password || !confirmPassword) {
-            setError('Please fill in all fields.');
+            toast({
+                title: "Error",
+                description: "Please fill in all fields.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
             return;
         }
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match.');
+            toast({
+                title: "Error",
+                description: "Passwords do not match.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
             return;
         }
 
         if (password.length < 6) {
-            setError('Password should be at least 6 characters long.');
+            toast({
+                title: "Error",
+                description: "Password should be at least 6 characters long.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
             return;
         }
 
         try {
             setIsLoading(true);
-
             const { user, error: registerError } = await registerWithEmailAndPassword(email, password);
 
             if (registerError) {
-                setError(registerError);
-                return;
+                throw new Error(registerError);
             }
 
             if (user) {
                 await updateProfile(auth.currentUser, {
                     displayName: username,
                 });
-
                 navigate('/');
             }
         } catch (err) {
-            setError(err.message);
+            toast({
+                title: "Error",
+                description: err.message,
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div style={styles.wrapper}>
-            <div style={styles.container}>
-                <h2 style={styles.title}>Sign Up</h2>
-                {error && <div style={styles.error}>{error}</div>}
-                <input
-                    type="text"
+        <Flex
+            direction="column"
+            align="center"
+            justify="center"
+            height="100vh"
+            bg="#f5f5dc"
+            p={4}
+        >
+            <MotionBox
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                bg="white"
+                p={8}
+                borderRadius="lg"
+                boxShadow="2xl"
+                width="100%"
+                maxWidth="400px"
+            >
+                <Heading as="h2" size="xl" color="#333" mb={6} textAlign="center">
+                    Sign Up
+                </Heading>
+                <Input
                     placeholder="Username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    style={styles.input}
+                    mb={4}
                     disabled={isLoading}
                 />
-                <input
+                <Input
                     type="email"
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    style={styles.input}
+                    mb={4}
                     disabled={isLoading}
                 />
-                <input
+                <Input
                     type="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    style={styles.input}
+                    mb={4}
                     disabled={isLoading}
                 />
-                <input
+                <Input
                     type="password"
                     placeholder="Confirm Password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    style={styles.input}
+                    mb={6}
                     disabled={isLoading}
                 />
-                <button
+                <Button
                     onClick={handleSignUp}
-                    style={{
-                        ...styles.button,
-                        opacity: isLoading ? 0.7 : 1,
-                        cursor: isLoading ? 'not-allowed' : 'pointer'
-                    }}
-                    disabled={isLoading}
+                    isLoading={isLoading}
+                    loadingText="Signing up..."
+                    colorScheme="blue"
+                    width="100%"
                 >
-                    {isLoading ? 'Signing up...' : 'Sign Up'}
-                </button>
-                <p style={styles.text}>
+                    Sign Up
+                </Button>
+                <Text mt={4} color="#666" textAlign="center">
                     Already have an account?{' '}
-                    <Link to="/" style={styles.link}>
+                    <Link to="/" style={{ color: '#007bff', textDecoration: 'underline' }}>
                         Log in
                     </Link>
-                </p>
-            </div>
-        </div>
+                </Text>
+            </MotionBox>
+        </Flex>
     );
-};
-
-const styles = {
-    wrapper: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        backgroundColor: '#121212',
-        width: '100vw',
-    },
-    container: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-        maxWidth: '400px',
-        padding: '40px',
-        backgroundColor: '#1e1e1e',
-        borderRadius: '10px',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.4)',
-    },
-    title: {
-        fontSize: '28px',
-        marginBottom: '20px',
-        color: '#fff',
-    },
-    input: {
-        width: '100%',
-        padding: '15px',
-        margin: '10px 0',
-        borderRadius: '5px',
-        border: '1px solid #444',
-        backgroundColor: '#333',
-        color: '#fff',
-        fontSize: '16px',
-    },
-    button: {
-        padding: '15px 30px',
-        backgroundColor: '#007bff',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '5px',
-        cursor: 'pointer',
-        fontSize: '16px',
-        marginTop: '20px',
-    },
-    text: {
-        marginTop: '20px',
-        color: '#bbb',
-    },
-    link: {
-        color: '#007bff',
-        cursor: 'pointer',
-        textDecoration: 'underline',
-    },
-    error: {
-        color: '#ff4444',
-        backgroundColor: 'rgba(255, 68, 68, 0.1)',
-        padding: '10px',
-        borderRadius: '5px',
-        marginBottom: '15px',
-        width: '100%',
-        textAlign: 'center',
-    },
 };
 
 export default Signup;
