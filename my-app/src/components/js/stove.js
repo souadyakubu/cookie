@@ -1,4 +1,3 @@
-// src/components/Stove.js
 import React from 'react';
 
 function Stove() {

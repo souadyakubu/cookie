@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowBackIcon } from '@chakra-ui/icons';
-import { Box, IconButton, Spinner, Center } from '@chakra-ui/react';
+import { ArrowBackIcon, StarIcon } from '@chakra-ui/icons';
+import { Box, IconButton, Spinner, Center, Tooltip, useToast, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, SimpleGrid } from '@chakra-ui/react';
+import { FaBookmark } from 'react-icons/fa';
 import SearchBar from './SearchBar';
 import RecipeList from './RecipeList';
 import RecipeDetail from './RecipeDetail';
@@ -10,12 +11,21 @@ import '../css/RecipeView.css';
 
 function RecipeView() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [recipes, setRecipes] = useState([]);
   const [categories, setCategories] = useState([]);
   const [areas, setAreas] = useState([]);
   const [randomMeals, setRandomMeals] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [savedMeals, setSavedMeals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSaved, setShowSaved] = useState(false);
+
+  // Load saved meals from localStorage on mount
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem('savedMeals') || '[]');
+    setSavedMeals(saved);
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -44,6 +54,32 @@ function RecipeView() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const saveMeal = (meal) => {
+    if (!savedMeals.some(m => m.idMeal === meal.idMeal)) {
+      const newSaved = [...savedMeals, meal];
+      setSavedMeals(newSaved);
+      localStorage.setItem('savedMeals', JSON.stringify(newSaved));
+      toast({
+        title: "Meal saved!",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const removeSavedMeal = (mealId) => {
+    const newSaved = savedMeals.filter(m => m.idMeal !== mealId);
+    setSavedMeals(newSaved);
+    localStorage.setItem('savedMeals', JSON.stringify(newSaved));
+    toast({
+      title: "Meal removed",
+      status: "info",
+      duration: 2000,
+      isClosable: true,
+    });
+  };
 
   const searchRecipes = useCallback(async (query) => {
     setIsLoading(true);
@@ -94,6 +130,7 @@ function RecipeView() {
 
   return (
     <div className="RecipeView">
+      {/* Back Button */}
       <Box position="fixed" top={4} left={4} zIndex={1000}>
         <IconButton
           icon={<ArrowBackIcon />}
@@ -104,6 +141,21 @@ function RecipeView() {
           bg="black"
           boxShadow="md"
         />
+      </Box>
+
+      {/* Saved Meals Button */}
+      <Box position="fixed" top={4} right={4} zIndex={1000}>
+        <Tooltip label="Saved Meals">
+          <IconButton
+            icon={<FaBookmark />}
+            onClick={() => navigate('/saved-meals')}  // Changed to navigate to dedicated page
+            aria-label="View saved meals"
+            size="lg"
+            colorScheme="yellow"
+            bg="yellow.400"
+            boxShadow="md"
+          />
+        </Tooltip>
       </Box>
 
       <h1 className="main-title">Recipe Explorer</h1>
@@ -121,10 +173,13 @@ function RecipeView() {
                       key={meal.idMeal}
                       recipe={meal}
                       onClick={() => setSelectedRecipe(meal)}
+                      onSave={() => saveMeal(meal)}
+                      isSaved={savedMeals.some(m => m.idMeal === meal.idMeal)}
                     />
                   ))}
                 </div>
               </section>
+
               <section className="categories">
                 <h2 className="section-title">Popular Categories</h2>
                 <div className="category-grid">
@@ -165,13 +220,24 @@ function RecipeView() {
           )}
 
           {recipes.length > 0 && (
-            <RecipeList recipes={recipes} onSelectRecipe={setSelectedRecipe} />
+            <RecipeList
+              recipes={recipes}
+              onSelectRecipe={setSelectedRecipe}
+              onSaveMeal={saveMeal}
+              savedMeals={savedMeals}
+            />
           )}
         </>
       )}
 
       {selectedRecipe && (
-        <RecipeDetail recipe={selectedRecipe} onBack={() => setSelectedRecipe(null)} />
+        <RecipeDetail
+          recipe={selectedRecipe}
+          onBack={() => setSelectedRecipe(null)}
+          onSave={saveMeal}
+          onRemove={removeSavedMeal}
+          isSaved={savedMeals.some(m => m.idMeal === selectedRecipe.idMeal)}
+        />
       )}
 
       <style jsx>{`

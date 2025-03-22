@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -11,7 +11,6 @@ const firebaseConfig = {
     measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
@@ -28,6 +27,15 @@ export const loginWithEmailAndPassword = async (email, password) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         return { user: userCredential.user };
+    } catch (error) {
+        return { error: error.message };
+    }
+};
+
+export const logout = async () => {
+    try {
+        await signOut(auth);
+        return { success: true };
     } catch (error) {
         return { error: error.message };
     }

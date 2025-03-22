@@ -1,119 +1,170 @@
 import React from 'react';
+import {
+  Box,
+  Heading,
+  Image,
+  Text,
+  Button,
+  List,
+  ListItem,
+  ListIcon,
+  IconButton,
+  Grid,
+  GridItem,
+  Link,
+  Tag,
+  useToast
+} from '@chakra-ui/react';
+import { ArrowBackIcon, StarIcon } from '@chakra-ui/icons';
+import { MdPlayCircleOutline } from 'react-icons/md';
 
-function RecipeDetail({ recipe, onBack }) {
+const RecipeDetail = ({ recipe, onBack, onSave, onRemove, isSaved }) => {
+  const toast = useToast();
+
+  // Extract ingredients and measurements
   const ingredients = [];
   for (let i = 1; i <= 20; i++) {
-    if (recipe[`strIngredient${i}`]) {
-      ingredients.push(`${recipe[`strIngredient${i}`]} - ${recipe[`strMeasure${i}`]}`);
+    const ingredient = recipe[`strIngredient${i}`];
+    const measure = recipe[`strMeasure${i}`];
+    if (ingredient && ingredient.trim() !== '') {
+      ingredients.push({ ingredient, measure });
     }
   }
 
+  // Convert YouTube URL to embed URL
+  const youtubeUrl = recipe.strYoutube?.replace('watch?v=', 'embed/');
+
   return (
-    <div className="recipe-detail">
-      <a onClick={onBack} className="back-link">
-        <span className="arrow">&#8592;</span> Back to list
-      </a>
-      <h2>{recipe.strMeal}</h2>
-      <div className="recipe-image">
-        <img src={recipe.strMealThumb} alt={recipe.strMeal} />
-      </div>
-      <div className="recipe-info">
-        <h3>Ingredients:</h3>
-        <ul className="ingredients-list">
-          {ingredients.map((ingredient, index) => (
-            <li key={index}>{ingredient}</li>
-          ))}
-        </ul>
-      </div>
-      <div className="recipe-instructions">
-        <h3>Instructions:</h3>
-        <p>{recipe.strInstructions}</p>
-      </div>
-      {recipe.strYoutube && (
-        <div className="recipe-video">
-          <h3>Video Tutorial:</h3>
-          <div className="video-container">
-            <iframe
-              width="560"
-              height="315"
-              src={`https://www.youtube.com/embed/${recipe.strYoutube.split('v=')[1]}`}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-          </div>
-        </div>
-      )}
-      <style jsx>{`
-        .recipe-detail {
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 2rem;
-          background-color: #fff;
-          border-radius: 10px;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .back-link {
-          color: #333;
-          text-decoration: none;
-          font-size: 1rem;
-          cursor: pointer;
-          display: inline-block;
-          margin-bottom: 1rem;
-        }
-        .back-link:hover {
-          text-decoration: underline;
-        }
-        .arrow {
-          font-size: 1.2rem;
-          margin-right: 0.5rem;
-        }
-        .recipe-detail h2 {
-          color: #964b00;
-          margin-bottom: 1.5rem;
-        }
-        .recipe-image {
-          margin-bottom: 2rem;
-        }
-        .recipe-image img {
-          width: 100%;
-          border-radius: 10px;
-        }
-        .recipe-info {
-         color: #964b00;
-          margin-bottom: 2rem;
-        }
-        .ingredients-list {
-        color:rgb(17, 17, 10);
-          list-style-type: none;
-          padding: 0;
-        }
-        .ingredients-list li {
-          margin-bottom: 0.5rem;
-        }
-        .recipe-instructions h3,
-        .recipe-video h3 {
-          color: #964b00;
-          margin-top: 1.5rem;
-        }
-        .video-container {
-          position: relative;
-          padding-bottom: 56.25%;
-          height: 0;
-          overflow: hidden;
-          margin-top: 1rem;
-        }
-        .video-container iframe {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-        }
-      `}</style>
-    </div>
+    <Box maxWidth="1200px" margin="0 auto" p={4}>
+      <Button
+        leftIcon={<ArrowBackIcon />}
+        onClick={onBack}
+        mb={4}
+        colorScheme="gray"
+        variant="ghost"
+      >
+        Back to Recipes
+      </Button>
+
+      <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={8}>
+        {/* Left Column */}
+        <GridItem>
+          <Box position="relative">
+            <Image
+              src={recipe.strMealThumb}
+              alt={recipe.strMeal}
+              borderRadius="lg"
+              boxShadow="xl"
+            />
+            <IconButton
+              icon={<StarIcon />}
+              position="absolute"
+              top={2}
+              right={2}
+              size="lg"
+              colorScheme={isSaved ? 'yellow' : 'gray'}
+              aria-label={isSaved ? 'Remove from saved' : 'Save recipe'}
+              onClick={() => {
+                if (isSaved) {
+                  onRemove(recipe.idMeal);
+                  toast({
+                    title: 'Removed from saved meals',
+                    status: 'info',
+                    duration: 2000,
+                  });
+                } else {
+                  onSave(recipe);
+                  toast({
+                    title: 'Recipe saved!',
+                    status: 'success',
+                    duration: 2000,
+                  });
+                }
+              }}
+            />
+          </Box>
+
+          {youtubeUrl && (
+            <Box mt={6}>
+              <Heading size="md" mb={4}>
+                Video Tutorial
+              </Heading>
+              <iframe
+                width="100%"
+                height="315"
+                src={youtubeUrl}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                style={{ borderRadius: '8px' }}
+              />
+            </Box>
+          )}
+        </GridItem>
+
+        {/* Right Column */}
+        <GridItem>
+          <Heading as="h1" size="xl" mb={4}>
+            {recipe.strMeal}
+          </Heading>
+
+          <Box mb={6}>
+            <Tag colorScheme="blue" mr={2}>
+              {recipe.strCategory}
+            </Tag>
+            {recipe.strTags?.split(',').map(tag => (
+              <Tag key={tag} colorScheme="green" mr={2} mt={2}>
+                {tag.trim()}
+              </Tag>
+            ))}
+          </Box>
+
+          <Box mb={8}>
+            <Heading size="md" mb={4}>
+              Ingredients
+            </Heading>
+            <List spacing={2}>
+              {ingredients.map((item, index) => (
+                <ListItem key={index} display="flex" alignItems="center">
+                  <ListIcon as={MdPlayCircleOutline} color="green.500" />
+                  <Text as="span" fontWeight="medium">
+                    {item.measure}
+                  </Text>
+                  <Text as="span" ml={1}>
+                    {item.ingredient}
+                  </Text>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+
+          <Box mb={8}>
+            <Heading size="md" mb={4}>
+              Instructions
+            </Heading>
+            <Text whiteSpace="pre-line">{recipe.strInstructions}</Text>
+          </Box>
+
+          {recipe.strSource && (
+            <Box>
+              <Heading size="md" mb={4}>
+                Source
+              </Heading>
+              <Link
+                href={recipe.strSource}
+                isExternal
+                color="blue.500"
+                wordBreak="break-all"
+              >
+                {recipe.strSource}
+              </Link>
+            </Box>
+          )}
+        </GridItem>
+      </Grid>
+    </Box>
   );
-}
+};
 
 export default RecipeDetail;

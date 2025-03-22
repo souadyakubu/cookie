@@ -1,50 +1,56 @@
-import React from 'react';
+import { IconButton, Box } from '@chakra-ui/react';
+import { StarIcon } from '@chakra-ui/icons';
+import { useNavigate } from 'react-router-dom';
 
-const RecipeCard = ({ recipe, onClick }) => {
-    return (
-        <div className="recipe-card" onClick={onClick}>
-            <div className="recipe-card-image">
-                <img src={recipe.strMealThumb} alt={recipe.strMeal} />
-            </div>
-            <div className="recipe-card-content">
-                <h3>{recipe.strMeal}</h3>
-                <p>{recipe.strArea} | {recipe.strCategory}</p>
-            </div>
-            <style jsx>{`
-        .recipe-card {
-          background-color: #fff;
-          border-radius: 10px;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          overflow: hidden;
-          transition: transform 0.3s, box-shadow 0.3s;
-          cursor: pointer;
-          margin-bottom: 20px;
-        }
-        .recipe-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-        .recipe-card-image img {
-          width: 100%;
-          height: 200px;
-          object-fit: cover;
-        }
-        .recipe-card-content {
-          padding: 1rem;
-        }
-        .recipe-card-content h3 {
-          margin: 0 0 0.5rem;
-          font-size: 1.2rem;
-          color: #964b00;
-        }
-        .recipe-card-content p {
-          margin: 0;
-          font-size: 0.9rem;
-          color: #786c3b;
-        }
-      `}</style>
-        </div>
-    );
+const RecipeCard = ({ recipe, onClick, isSaved }) => {
+  const navigate = useNavigate();
+
+  const handleSaveToggle = (e) => {
+    e.stopPropagation();
+    const saved = JSON.parse(localStorage.getItem('savedMeals') || '[]');
+
+    if (isSaved) {
+      const updated = saved.filter(m => m.idMeal !== recipe.idMeal);
+      localStorage.setItem('savedMeals', JSON.stringify(updated));
+    } else {
+      localStorage.setItem('savedMeals', JSON.stringify([...saved, recipe]));
+    }
+    navigate(0); // Refresh the page to update state
+  };
+
+  return (
+    <Box
+      position="relative"
+      borderWidth="1px"
+      borderRadius="lg"
+      overflow="hidden"
+      cursor="pointer"
+      onClick={onClick}
+      _hover={{ transform: 'scale(1.05)' }}
+      transition="transform 0.2s"
+    >
+      <img
+        src={recipe.strMealThumb}
+        alt={recipe.strMeal}
+        style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+      />
+      <Box p={4}>
+        <h3 style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{recipe.strMeal}</h3>
+      </Box>
+      <IconButton
+        icon={<StarIcon color={isSaved ? "yellow.400" : "gray.300"} />}
+        position="absolute"
+        top={2}
+        right={2}
+        aria-label={isSaved ? "Remove from saved" : "Save meal"}
+        onClick={handleSaveToggle}
+        bg="white"
+        borderRadius="full"
+        boxShadow="md"
+        _hover={{ bg: "gray.100" }}
+      />
+    </Box>
+  );
 };
 
 export default RecipeCard;

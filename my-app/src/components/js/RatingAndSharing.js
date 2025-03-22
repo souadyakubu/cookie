@@ -1,4 +1,3 @@
-// src/components/RatingAndSharing.js
 import React from 'react';
 
 function RatingAndSharing() {

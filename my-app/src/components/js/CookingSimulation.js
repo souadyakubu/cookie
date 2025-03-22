@@ -1,4 +1,3 @@
-// src/components/CookingSimulation.js
 import React from 'react';
 import Stove from './stove';
 

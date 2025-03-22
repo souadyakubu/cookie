@@ -1,4 +1,3 @@
-// src/components/ARMode.js
 import React from 'react';
 
 function ARMode() {
