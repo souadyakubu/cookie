@@ -18,7 +18,8 @@ import {
 import { ArrowBackIcon, StarIcon } from '@chakra-ui/icons';
 import { MdPlayCircleOutline } from 'react-icons/md';
 
-const RecipeDetail = ({ recipe, onBack, onSave, onRemove, isSaved }) => {
+
+const RecipeDetail = ({ recipe, onBack, onSave, onRemove, isSaved, lastListType }) => {
   const toast = useToast();
 
   // Extract ingredients and measurements
@@ -43,8 +44,13 @@ const RecipeDetail = ({ recipe, onBack, onSave, onRemove, isSaved }) => {
         colorScheme="gray"
         variant="ghost"
       >
-        Back to Recipes
+
+        {lastListType === 'category' && 'Back to Categories'}
+        {lastListType === 'country' && 'Back to Countries'}
+        {lastListType === 'search' && 'Back to Search Results'}
+        {!['category', 'country', 'search'].includes(lastListType) && 'Back to Recipes'}
       </Button>
+
 
       <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={8}>
         {/* Left Column */}

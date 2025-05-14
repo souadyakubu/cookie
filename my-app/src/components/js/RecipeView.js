@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowBackIcon } from '@chakra-ui/icons';
-import { Box, IconButton, Spinner, Center, Tooltip, useToast, Text } from '@chakra-ui/react';
+import { Box, IconButton, Spinner, Center, Tooltip, useToast, Text, Button } from '@chakra-ui/react';
 import { FaBookmark } from 'react-icons/fa';
 import SearchBar from './SearchBar';
 import RecipeList from './RecipeList';
@@ -21,6 +21,8 @@ function RecipeView() {
   const [savedMeals, setSavedMeals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [noResults, setNoResults] = useState(false);
+  const [lastListType, setLastListType] = useState('featured');
+  const [filterType, setFilterType] = useState(null);
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('savedMeals') || '[]');
@@ -82,8 +84,10 @@ function RecipeView() {
   };
 
   const searchRecipes = useCallback(async (query) => {
+    setLastListType('search');
     setIsLoading(true);
     setNoResults(false);
+    setFilterType(null);
     try {
       const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${query}`);
       const data = await response.json();
@@ -102,8 +106,10 @@ function RecipeView() {
   }, []);
 
   const searchByCategory = useCallback(async (category) => {
+    setLastListType('category');
     setIsLoading(true);
     setNoResults(false);
+    setFilterType('category');
     try {
       const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`);
       const data = await response.json();
@@ -116,8 +122,10 @@ function RecipeView() {
   }, []);
 
   const searchByArea = useCallback(async (area) => {
+    setLastListType('country');
     setIsLoading(true);
     setNoResults(false);
+    setFilterType('country');
     try {
       const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?a=${area}`);
       const data = await response.json();
@@ -128,6 +136,7 @@ function RecipeView() {
       setIsLoading(false);
     }
   }, []);
+
 
   const playAudio = () => {
     if (audioRef.current) {
@@ -142,6 +151,31 @@ function RecipeView() {
       </Center>
     );
   }
+
+  const goHome = () => {
+    setRecipes([]);
+    setNoResults(false);
+    setFilterType(null);
+  };
+
+  const handleSelectRecipe = async (meal) => {
+    // If the meal already has instructions, it's a full object (e.g., from search or featured)
+    if (meal.strInstructions) {
+      setSelectedRecipe(meal);
+      return;
+    }
+    // Otherwise, fetch full meal details by ID
+    try {
+      const response = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.idMeal}`);
+      const data = await response.json();
+      if (data.meals && data.meals[0]) {
+        setSelectedRecipe(data.meals[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching meal details:', error);
+    }
+  };
+
 
   return (
     <div className="RecipeView">
@@ -184,6 +218,7 @@ function RecipeView() {
 
           <audio ref={audioRef} src="/wah-wah-sad-trombone-6347.mp3" />
 
+
           {recipes.length === 0 && !noResults && (
             <div className="home-sections">
               <section className="hero">
@@ -200,6 +235,7 @@ function RecipeView() {
                   ))}
                 </div>
               </section>
+
 
               <section className="categories">
                 <h2 className="section-title">Popular Categories</h2>
@@ -240,14 +276,29 @@ function RecipeView() {
             </div>
           )}
 
+
+          {recipes.length > 0 && !selectedRecipe && (filterType === 'category' || filterType === 'country') && (
+            <Box textAlign="left" mb={4}>
+              <Button
+                leftIcon={<ArrowBackIcon />}
+                colorScheme="gray"
+                variant="ghost"
+                onClick={goHome}
+              >
+                Back to Home
+              </Button>
+            </Box>
+          )}
+
           {recipes.length > 0 && (
             <RecipeList
               recipes={recipes}
-              onSelectRecipe={setSelectedRecipe}
+              onSelectRecipe={handleSelectRecipe}
               onSaveMeal={saveMeal}
               savedMeals={savedMeals}
             />
           )}
+
         </>
       )}
 
@@ -258,6 +309,8 @@ function RecipeView() {
           onSave={saveMeal}
           onRemove={removeSavedMeal}
           isSaved={savedMeals.some(m => m.idMeal === selectedRecipe.idMeal)}
+          lastListType={lastListType}
+
         />
       )}
 
