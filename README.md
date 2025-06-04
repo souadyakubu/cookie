@@ -42,7 +42,7 @@ Includes an animated tag-based selection interface and responsive grid layout.
 
 ---
 
-### 3. Cooking Simulation
+### 3. Cooking Simulation (this section is currently under completion)
 
 Offers a gamified, step-by-step cooking experience:
 
@@ -76,7 +76,6 @@ Built using:
 - **ReactMarkdown** for recipe rendering
 - **React Icons** for visual elements
 
-The app follows a mobile-first, responsive design pattern with attention to accessibility and interactive user experience.
 
 ---
 
@@ -86,8 +85,8 @@ To run the application locally, follow these steps:
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
-cd <your-project-root>
+git clone https://github.com/souadyakubu/cookie.git
+cd cookie
 
 # Navigate to the frontend project directory
 cd my-app
