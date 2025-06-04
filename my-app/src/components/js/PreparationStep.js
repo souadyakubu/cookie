@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Heading, Grid, Image, Text, Button } from '@chakra-ui/react';
-import { useDrag, useDrop } from 'react-dnd';
+import { useDrop } from 'react-dnd';
 import DraggableIngredient from './DraggableIngredient';
 
 const PreparationStep = ({ ingredients, tools, onComplete }) => {

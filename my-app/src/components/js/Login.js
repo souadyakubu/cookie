@@ -71,7 +71,6 @@ const Login = ({ onLogin }) => {
                 width="100%"
                 maxWidth="400px"
             >
-                {/* Logo Section */}
                 <Flex justify="center" mb={6}>
                     <img
                         src="/img/a.png"

@@ -8,7 +8,6 @@ import PreparationStep from './PreparationStep';
 import IngredientsStep from './IngredientsStep';
 import CookingStep from './CookingStep';
 
-// Tool images (replace with actual image URLs)
 const TOOL_IMAGES = {
   knife: 'https://img.icons8.com/ios/500/knife.png',
   cuttingBoard: 'https://img.icons8.com/ios/500/cutting-board.png',
@@ -25,17 +24,17 @@ const CookingSimulation = () => {
   useEffect(() => {
     const fetchMeals = async () => {
       try {
-        // Fetch meals for multiple letters to get more variety
+        // fetching meals for multiple letters to get more variety
         const letters = ['a', 'b', 'c', 'd', 'e']; // Add more letters as needed
         const promises = letters.map(letter =>
           axios.get(`https://www.themealdb.com/api/json/v1/1/search.php?f=${letter}`)
         );
         const responses = await Promise.all(promises);
 
-        // Combine all meal results and parse ingredients
+        // Combining all meal results and parse ingredients
         const allMeals = responses
           .flatMap(response => response.data.meals || [])
-          .slice(0, 30) // Limit to 12 meals
+          .slice(0, 30)
           .map(meal => ({
             ...meal,
             ingredients: parseIngredients(meal)

@@ -22,7 +22,7 @@ import { MdPlayCircleOutline } from 'react-icons/md';
 const RecipeDetail = ({ recipe, onBack, onSave, onRemove, isSaved, lastListType }) => {
   const toast = useToast();
 
-  // Extract ingredients and measurements
+  // extracting ingredients and measurements
   const ingredients = [];
   for (let i = 1; i <= 20; i++) {
     const ingredient = recipe[`strIngredient${i}`];

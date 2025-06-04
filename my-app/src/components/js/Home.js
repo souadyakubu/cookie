@@ -47,7 +47,6 @@ function Home() {
     }
   };
 
-  // Hold handlers
   const handleHoldStart = (index) => {
     setHeldIndex(index);
     setIsPaused(true);
@@ -58,21 +57,20 @@ function Home() {
     setIsPaused(false);
   };
 
-  // Animation configs for each image
+  // these are animation configs for each image
   const animations = [
     isPaused ? {} : { y: [0, -10, 0] },
     isPaused ? {} : { scale: [1, 1.2, 1] },
     isPaused ? {} : { rotate: [0, -10, 10, -10, 0] },
   ];
 
-  // Text for each image
+  // text for each image
   const texts = [
     "Search or View Great Recipes",
     "Get Ingredient Suggestions",
     "Try Our Cooking Simulations",
   ];
 
-  // Image sources and navigation paths
   const images = [
     { src: "/img/A.gif", alt: "Recipe Viewing", path: "/recipe-viewing" },
     { src: "/img/B.gif", alt: "Ingredient Suggestions", path: "/ingredient-suggestions" },
@@ -81,7 +79,6 @@ function Home() {
 
   return (
     <Box position="relative" height="100vh" bg="#f5f5dc" p={4} overflowX="hidden">
-      {/* Logout Icon */}
       <IconButton
         icon={<FiLogOut />}
         onClick={handleLogout}
@@ -93,7 +90,6 @@ function Home() {
         aria-label="Logout"
       />
 
-      {/* Main Content */}
       <Flex direction="column" align="center" justify="center" height="100%">
         <Heading as="h1" size="2xl" color="#333" mb={12}>
           What's  🍪'n?
@@ -123,7 +119,7 @@ function Home() {
                 onClick={() => navigate(img.path)}
                 position="relative"
                 overflow="hidden"
-                // Hold handlers (works for mouse and touch)
+                // this works for mouse and touch
                 onPointerDown={() => handleHoldStart(idx)}
                 onPointerUp={handleHoldEnd}
                 onPointerLeave={handleHoldEnd}

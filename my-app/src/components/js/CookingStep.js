@@ -22,7 +22,7 @@ const CookingStep = ({ preparedItems = [], onComplete }) => {
         collect: (monitor) => ({ isOver: !!monitor.isOver() }),
     }));
 
-    // Simulate cooking progress
+    // Simulating cooking progress
     useEffect(() => {
         if (isCooking && cookingProgress < 100) {
             const timer = setInterval(() => {

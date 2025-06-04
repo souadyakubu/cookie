@@ -2,7 +2,7 @@ import OpenAI from 'openai/index.mjs';
 
 const openai = new OpenAI({
   apiKey: process.env.REACT_APP_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // Only for development
+  dangerouslyAllowBrowser: true // this is only for development
 });
 
 console.log("API Key (first 5 chars):", process.env.REACT_APP_OPENAI_API_KEY?.substring(0, 5) + "...");

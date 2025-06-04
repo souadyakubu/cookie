@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getSuggestions } from '../../utils/openAI';
 
-const SPOONACULAR_API_KEY = 'YOUR_SPOONACULAR_API_KEY';
+const SPOONACULAR_API_KEY = 'SPOONACULAR_API_KEY';
 
 function CookingGameMode() {
     const [searchTerm, setSearchTerm] = useState('');

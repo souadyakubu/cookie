@@ -159,7 +159,7 @@ function RecipeView() {
   };
 
   const handleSelectRecipe = async (meal) => {
-    // If the meal already has instructions, it's a full object (e.g., from search or featured)
+    // If the meal already has instructions, it's a full object 
     if (meal.strInstructions) {
       setSelectedRecipe(meal);
       return;
