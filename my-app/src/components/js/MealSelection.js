@@ -1,4 +1,3 @@
-import React from 'react';
 import { Grid, Box, Image, Text, Spinner } from '@chakra-ui/react';
 
 const MealSelection = ({ meals = [], loading, onSelect }) => (

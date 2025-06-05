@@ -22,11 +22,10 @@ video {
   box-sizing: border-box;
 }
 
-/* Ensure buttons and links are tap-friendly */
+/* Ensuring that buttons and links are tap-friendly */
 button,
 a {
   min-height: 44px;
-  /* Recommended mobile tap target */
   min-width: 44px;
   cursor: pointer;
 }

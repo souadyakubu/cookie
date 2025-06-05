@@ -119,7 +119,6 @@ function Home() {
                 onClick={() => navigate(img.path)}
                 position="relative"
                 overflow="hidden"
-                // this works for mouse and touch
                 onPointerDown={() => handleHoldStart(idx)}
                 onPointerUp={handleHoldEnd}
                 onPointerLeave={handleHoldEnd}

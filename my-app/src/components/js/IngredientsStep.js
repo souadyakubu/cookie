@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Text, Grid, Image } from '@chakra-ui/react';
 
 const IngredientsStep = ({ ingredients, onComplete }) => {

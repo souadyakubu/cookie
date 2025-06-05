@@ -6,17 +6,17 @@ const SPOONACULAR_API_KEY = 'SPOONACULAR_API_KEY';
 
 function CookingGameMode() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [recipe, setRecipe] = useState(null);
+    const [setRecipe] = useState(null);
     const [ingredients, setIngredients] = useState([]);
     const [ingredientImages, setIngredientImages] = useState({});
-    const [utensils, setUtensils] = useState([
+    const [utensils] = useState([
         { name: 'Knife', image: '/images/knife.png' },
         { name: 'Pan', image: '/images/pan.png' },
         { name: 'Spatula', image: '/images/spatula.png' }
     ]);
     const [gameState, setGameState] = useState('idle');
     const [score, setScore] = useState(0);
-    const [timer, setTimer] = useState(300); // 5 minutes in seconds
+    const [timer, setTimer] = useState(300);
 
     useEffect(() => {
         let interval;

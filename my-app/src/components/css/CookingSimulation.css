@@ -6,13 +6,3 @@
 .cooking-station {
     animation: cooking 2s infinite alternate;
 }
-
-@keyframes cooking {
-    from {
-        transform: translateY(0);
-    }
-
-    to {
-        transform: translateY(-5px);
-    }
-}

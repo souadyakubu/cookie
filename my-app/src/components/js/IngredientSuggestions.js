@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
 import { getSuggestions } from '../../utils/openAI';
@@ -9,9 +9,9 @@ import { motion } from 'framer-motion';
 const MotionBox = motion(Box);
 
 const categories = {
-  Vegetables: ['Tomato', 'Carrot', 'Broccoli', 'Spinach', 'Garlic', 'Onion'],
-  Proteins: ['Chicken', 'Beef', 'Tofu', 'Eggs', 'Salmon', 'Shrimp'],
-  Grains: ['Rice', 'Pasta', 'Wheet', 'Oats', 'Barley'],
+  Vegetables: ['Tomato', 'Carrot', 'Garlic', 'Onion', 'Spinach'],
+  Proteins: ['Chicken', 'Beef', 'Shrimp', 'Eggs', 'Salmon'],
+  Grains: ['Barley', 'Pasta', 'Wheet', 'Oats', 'Rice'],
   Dairy: ['Milk', 'Cheese', 'Yogurt', 'Butter', 'Cream']
 };
 
@@ -110,61 +110,65 @@ const IngredientSuggestions = () => {
                   Suggested Ingredients
                 </Heading>
               </TitleBox>
-              <Grid templateColumns="repeat(2, 1fr)" gap={8}>
+              <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)", lg: "repeat(4, 1fr)" }} gap={4}>
                 {Object.entries(categories).map(([category, items]) => (
-                  <Box key={category} bg="gray.50" p={6} borderRadius="lg" boxShadow="md">
-                    <Heading as="h3" size="md" mb={4} color="gray.600">
+                  <Box key={category} bg="gray.50" p={3} borderRadius="md" boxShadow="sm">
+                    <Heading as="h3" size="sm" mb={2} color="gray.700" fontWeight="semibold">
                       {category}
                     </Heading>
-                    <Divider mb={4} />
-                    <Flex flexWrap="wrap" gap={3}>
+                    <Divider mb={2} />
+                    <Flex flexWrap="wrap" gap={2}>
                       {items.map(item => (
-                        <MotionBox
+                        <Button
                           key={item}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleSelect(item)}
+                          colorScheme={selected.includes(item) ? "blue" : "gray"}
+                          variant={selected.includes(item) ? "solid" : "outline"}
+                          size="sm"
+                          borderRadius="full"
+                          px={3}
+                          py={1}
                         >
-                          <Button
-                            onClick={() => handleSelect(item)}
-                            colorScheme={selected.includes(item) ? "blue" : "gray"}
-                            variant={selected.includes(item) ? "solid" : "outline"}
-                            size="md"
-                          >
-                            {item}
-                          </Button>
-                        </MotionBox>
+                          {item}
+                        </Button>
                       ))}
                     </Flex>
                   </Box>
                 ))}
               </Grid>
+
             </Box>
 
-            <Box>
+            <Box bg="gray.50" p={6} borderRadius="xl" boxShadow="md">
               <TitleBox>
-                <Heading as="h2" size="lg" mb={2}>
+                <Heading as="h2" size="lg" mb={4}>
                   Add Custom Ingredient
                 </Heading>
               </TitleBox>
-              <Flex>
+              <Flex direction={{ base: 'column', md: 'row' }} gap={4}>
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Type an ingredient and press Enter..."
                   size="lg"
-                  mr={4}
+                  flex="1"
+                  borderRadius="full"
+                  bg="white"
                 />
                 <Button
                   onClick={() => handleSelect(input.trim())}
                   colorScheme="blue"
                   isDisabled={!input.trim()}
                   size="lg"
+                  borderRadius="full"
+                  px={8}
                 >
                   Add
                 </Button>
               </Flex>
             </Box>
+
 
             <Box>
               <TitleBox>
@@ -194,7 +198,7 @@ const IngredientSuggestions = () => {
                 size="lg"
                 px={12}
                 py={6}
-                borderRadius="lg"
+                borderRadius="3xl"
                 boxShadow="lg"
                 _hover={{
                   boxShadow: 'xl',
@@ -207,34 +211,50 @@ const IngredientSuggestions = () => {
               </Button>
             </MotionBox>
 
+
             {results && (
               <MotionBox
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
                 bg="gray.50"
-                p={6}
+                p={8}
                 borderRadius="lg"
-                boxShadow="md"
+                boxShadow="lg"
+                maxW="3xl"
+                mx="auto"
               >
-                <ReactMarkdown
-                  components={{
-                    h1: ({ node, ...props }) => (
-                      <Heading as="h1" size="2xl" fontWeight="bold" mb={6} borderBottom="2px" borderColor="blue.500" pb={2} {...props} />
-                    ),
-                    h2: ({ node, ...props }) => (
-                      <Heading as="h2" size="xl" fontWeight="bold" mb={4} color="blue.600" {...props} />
-                    ),
-                    h3: ({ node, ...props }) => (
-                      <Heading as="h3" size="lg" fontWeight="bold" mb={3} color="blue.500" {...props} />
-                    ),
-                    strong: ({ node, ...props }) => <Text as="strong" fontWeight="bold" color="blue.700" {...props} />
-                  }}
-                >
-                  {results}
-                </ReactMarkdown>
+                <Heading size="lg" mb={4} color="blue.700" textAlign="center">
+                  Your Recipe Suggestions
+                </Heading>
+                <Divider mb={6} />
+
+                <Box as="article" className="recipe-markdown">
+                  <ReactMarkdown
+                    components={{
+                      h1: ({ node, ...props }) => (
+                        <Heading as="h1" size="lg" mb={4} mt={8} color="blue.800" {...props} />
+                      ),
+                      h2: ({ node, ...props }) => (
+                        <Heading as="h2" size="md" mb={3} mt={6} color="blue.600" {...props} />
+                      ),
+                      h3: ({ node, ...props }) => (
+                        <Heading as="h3" size="sm" mb={2} mt={4} color="blue.500" {...props} />
+                      ),
+                      p: ({ node, ...props }) => <Text fontSize="md" mb={4} lineHeight="1.6" color="gray.700" {...props} />,
+                      li: ({ node, ...props }) => (
+                        <Box as="li" ml={6} mb={2} fontSize="md" color="gray.700" listStyleType="disc" {...props} />
+                      ),
+                      strong: ({ node, ...props }) => <Text as="strong" fontWeight="semibold" color="blue.700" {...props} />,
+                      ul: ({ node, ...props }) => <Box as="ul" pl={4} mb={4} {...props} />,
+                    }}
+                  >
+                    {results}
+                  </ReactMarkdown>
+                </Box>
               </MotionBox>
             )}
+
           </VStack>
         </Box>
       </Container>

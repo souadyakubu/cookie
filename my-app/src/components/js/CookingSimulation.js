@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { Box, Heading, Grid, Image, Text, Button, Spinner } from '@chakra-ui/react';
+import { Box, Heading, Text, Button } from '@chakra-ui/react';
 import axios from 'axios';
 import MealSelection from './MealSelection';
 import PreparationStep from './PreparationStep';

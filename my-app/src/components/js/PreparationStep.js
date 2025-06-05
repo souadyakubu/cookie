@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, Heading, Grid, Image, Text, Button } from '@chakra-ui/react';
 import { useDrop } from 'react-dnd';
 import DraggableIngredient from './DraggableIngredient';

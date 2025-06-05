@@ -17,7 +17,7 @@ const Signup = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSignUp = async () => {
-        // Validate inputs
+        // Validating inputs
         if (!username || !email || !password || !confirmPassword) {
             toast({
                 title: "Error",

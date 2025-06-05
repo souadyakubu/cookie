@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Text, Image, Heading, Grid, Button, Progress } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { useDrag, useDrop } from 'react-dnd';
@@ -11,7 +11,7 @@ const CookingStep = ({ preparedItems = [], onComplete }) => {
     const [isCooking, setIsCooking] = useState(false);
     const [isCooked, setIsCooked] = useState(false);
 
-    // Drop zone for ingredients
+    // the drop zone for ingredients
     const [{ isOver }, drop] = useDrop(() => ({
         accept: 'cooking-ingredient',
         drop: (item) => {
@@ -95,7 +95,6 @@ const CookingStep = ({ preparedItems = [], onComplete }) => {
                 ))}
             </Grid>
 
-            {/* Buttons */}
             {!isCooked ? (
                 <Button mt={8} colorScheme="green" onClick={startCooking} isDisabled={!ingredientsInPan.length || isCooking}>
                     {isCooking ? `Cooking... ${cookingProgress}%` : 'Start Cooking'}

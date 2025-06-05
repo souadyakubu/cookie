@@ -1,20 +1,18 @@
-import React from 'react';
 import RecipeCard from './RecipeCard';
 
 function RecipeList({ recipes, onSelectRecipe }) {
-    return (
-        <div className="recipe-list-container">
-            <h2>Recipes</h2>
-            <div className="recipe-list">
-                {recipes.map((recipe) => (
-                    <RecipeCard
-                        key={recipe.idMeal}
-                        recipe={recipe}
-                        onClick={() => onSelectRecipe(recipe)}
-                    />
-                ))}
-            </div>
-            <style jsx>{`
+  return (
+    <div className="recipe-list-container">
+      <div className="recipe-list">
+        {recipes.map((recipe) => (
+          <RecipeCard
+            key={recipe.idMeal}
+            recipe={recipe}
+            onClick={() => onSelectRecipe(recipe)}
+          />
+        ))}
+      </div>
+      <style jsx>{`
         .recipe-list-container {
           margin: 2rem 0;
         }
@@ -29,8 +27,8 @@ function RecipeList({ recipes, onSelectRecipe }) {
           gap: 2rem;
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }
 
 export default RecipeList;

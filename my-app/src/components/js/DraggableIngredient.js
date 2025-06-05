@@ -1,4 +1,3 @@
-import React from 'react';
 import { useDrag } from 'react-dnd';
 import { Box, Image, Text } from '@chakra-ui/react';
 

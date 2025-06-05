@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowBackIcon } from '@chakra-ui/icons';
 import { Box, IconButton, Spinner, Center, Tooltip, useToast, Text, Button } from '@chakra-ui/react';
@@ -23,6 +23,8 @@ function RecipeView() {
   const [noResults, setNoResults] = useState(false);
   const [lastListType, setLastListType] = useState('featured');
   const [filterType, setFilterType] = useState(null);
+  const [selectedCategoryOrArea, setSelectedCategoryOrArea] = useState('');
+  const [searchHeader, setSearchHeader] = useState('');
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('savedMeals') || '[]');
@@ -83,11 +85,23 @@ function RecipeView() {
     });
   };
 
+  // fnding category name if search matches a category
+  const getCategoryHeader = (query) => {
+    const match = categories.find(
+      c => c.strCategory.toLowerCase() === query.trim().toLowerCase()
+    );
+    return match ? `${match.strCategory} Recipes` : '';
+  };
+
   const searchRecipes = useCallback(async (query) => {
     setLastListType('search');
     setIsLoading(true);
     setNoResults(false);
-    setFilterType(null);
+    setFilterType('search');
+    setSelectedCategoryOrArea('');
+    //matching category if possible, else generic
+    const catHeader = getCategoryHeader(query);
+    setSearchHeader(catHeader || (query ? `${query} Recipes` : 'Search Results'));
     try {
       const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${query}`);
       const data = await response.json();
@@ -103,13 +117,15 @@ function RecipeView() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [categories]);
 
   const searchByCategory = useCallback(async (category) => {
     setLastListType('category');
     setIsLoading(true);
     setNoResults(false);
     setFilterType('category');
+    setSelectedCategoryOrArea(category);
+    setSearchHeader('');
     try {
       const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`);
       const data = await response.json();
@@ -126,6 +142,8 @@ function RecipeView() {
     setIsLoading(true);
     setNoResults(false);
     setFilterType('country');
+    setSelectedCategoryOrArea(area);
+    setSearchHeader('');
     try {
       const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?a=${area}`);
       const data = await response.json();
@@ -136,7 +154,6 @@ function RecipeView() {
       setIsLoading(false);
     }
   }, []);
-
 
   const playAudio = () => {
     if (audioRef.current) {
@@ -156,15 +173,15 @@ function RecipeView() {
     setRecipes([]);
     setNoResults(false);
     setFilterType(null);
+    setSelectedCategoryOrArea('');
+    setSearchHeader('');
   };
 
   const handleSelectRecipe = async (meal) => {
-    // If the meal already has instructions, it's a full object 
     if (meal.strInstructions) {
       setSelectedRecipe(meal);
       return;
     }
-    // Otherwise, fetch full meal details by ID
     try {
       const response = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.idMeal}`);
       const data = await response.json();
@@ -176,6 +193,19 @@ function RecipeView() {
     }
   };
 
+  // Determinining if I should show the back button and dynamic header
+  const showBackAndHeader =
+    recipes.length > 0 &&
+    !selectedRecipe &&
+    (filterType === 'category' || filterType === 'country' || filterType === 'search');
+
+  // Determinining the header text
+  let headerText = '';
+  if (filterType === 'category' || filterType === 'country') {
+    headerText = `${selectedCategoryOrArea} Recipes`;
+  } else if (filterType === 'search' && recipes.length > 0) {
+    headerText = searchHeader;
+  }
 
   return (
     <div className="RecipeView">
@@ -218,7 +248,6 @@ function RecipeView() {
 
           <audio ref={audioRef} src="/wah-wah-sad-trombone-6347.mp3" />
 
-
           {recipes.length === 0 && !noResults && (
             <div className="home-sections">
               <section className="hero">
@@ -228,14 +257,17 @@ function RecipeView() {
                     <RecipeCard
                       key={meal.idMeal}
                       recipe={meal}
-                      onClick={() => setSelectedRecipe(meal)}
+                      onClick={() => {
+                        setLastListType('featured');
+                        setSelectedRecipe(meal);
+                      }}
                       onSave={() => saveMeal(meal)}
                       isSaved={savedMeals.some(m => m.idMeal === meal.idMeal)}
                     />
+
                   ))}
                 </div>
               </section>
-
 
               <section className="categories">
                 <h2 className="section-title">Popular Categories</h2>
@@ -276,18 +308,22 @@ function RecipeView() {
             </div>
           )}
 
-
-          {recipes.length > 0 && !selectedRecipe && (filterType === 'category' || filterType === 'country') && (
-            <Box textAlign="left" mb={4}>
-              <Button
-                leftIcon={<ArrowBackIcon />}
-                colorScheme="gray"
-                variant="ghost"
-                onClick={goHome}
-              >
-                Back to Home
-              </Button>
-            </Box>
+          {showBackAndHeader && (
+            <>
+              <Box textAlign="left" mb={4}>
+                <Button
+                  leftIcon={<ArrowBackIcon />}
+                  colorScheme="gray"
+                  variant="ghost"
+                  onClick={goHome}
+                >
+                  Back to Home
+                </Button>
+              </Box>
+              <h2 className="section-title" style={{ marginTop: 0 }}>
+                {headerText}
+              </h2>
+            </>
           )}
 
           {recipes.length > 0 && (
@@ -298,7 +334,6 @@ function RecipeView() {
               savedMeals={savedMeals}
             />
           )}
-
         </>
       )}
 
@@ -310,7 +345,6 @@ function RecipeView() {
           onRemove={removeSavedMeal}
           isSaved={savedMeals.some(m => m.idMeal === selectedRecipe.idMeal)}
           lastListType={lastListType}
-
         />
       )}
 
